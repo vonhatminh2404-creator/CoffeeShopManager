@@ -1,0 +1,176 @@
+﻿@model CoffeeShopManager.Models.DonHang
+
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+}
+
+<style>
+    .order-detail-page {
+        min-height: 100vh;
+        background: #f5f1e8;
+        padding: 45px 30px 70px;
+        font-family: 'Merriweather', 'Noto Serif Display', 'Be Vietnam Pro', serif;
+    }
+
+    .order-detail-sheet {
+        max-width: 950px;
+        margin: 0 auto;
+        background: #f8f6ef;
+        border: 4px solid #4d5c4f;
+        padding: 36px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    }
+
+    .detail-title {
+        text-align: center;
+        color: #8f2f24;
+        font-size: 40px;
+        font-weight: 900;
+        text-transform: uppercase;
+        margin-bottom: 18px;
+    }
+
+    .detail-line {
+        border-bottom: 4px dashed #8f2f24;
+        margin: 0 auto 30px;
+        width: 92%;
+    }
+
+    .info-row {
+        margin-bottom: 20px;
+    }
+
+    .info-label {
+        color: #28404a;
+        font-size: 18px;
+        font-weight: 900;
+        margin-bottom: 8px;
+    }
+
+    .info-value {
+        color: #6f7680;
+        font-size: 18px;
+        font-weight: 800;
+        border-bottom: 3px solid #4d5c4f;
+        padding: 8px 6px 12px;
+    }
+
+    .price-text {
+        color: #8f2f24;
+        font-size: 24px;
+        font-weight: 900;
+    }
+
+    .product-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 26px;
+    }
+
+        .product-table th {
+            background: #3d5343;
+            color: white;
+            padding: 12px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .product-table td {
+            border-bottom: 3px solid #4d5c4f;
+            padding: 14px 8px;
+            text-align: center;
+            font-weight: 800;
+            color: #28404a;
+        }
+
+    .back-btn {
+        display: inline-flex;
+        margin-top: 30px;
+        min-width: 170px;
+        height: 52px;
+        border: 4px solid #4d5c4f;
+        color: #26404a;
+        text-decoration: none;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        text-transform: uppercase;
+    }
+
+        .back-btn:hover {
+            background: #e9e3d7;
+            color: #26404a;
+        }
+</style>
+
+<div class="order-detail-page">
+    <div class="order-detail-sheet">
+        <h1 class="detail-title">Chi tiết đơn hàng</h1>
+        <div class="detail-line"></div>
+
+        <div class="info-row">
+            <div class="info-label">Mã đơn hàng:</div>
+            <div class="info-value">#@Model.MaDonHang</div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Ngày đặt:</div>
+            <div class="info-value">@Model.NgayDat.ToString("dd/MM/yyyy HH:mm")</div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Tên khách hàng:</div>
+            <div class="info-value">@Model.TenKhachHang</div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Số điện thoại:</div>
+            <div class="info-value">@Model.SoDienThoai</div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Trạng thái:</div>
+            <div class="info-value">@Model.TrangThai</div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Ghi chú:</div>
+            <div class="info-value">@(string.IsNullOrWhiteSpace(Model.GhiChu) ? "Không có" : Model.GhiChu)</div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Tổng tiền:</div>
+            <div class="info-value price-text">@Model.TongTien.ToString("N0") Đ</div>
+        </div>
+
+        @if (Model.ChiTietDonHangs != null && Model.ChiTietDonHangs.Any())
+        {
+            <table class="product-table">
+                <thead>
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th>Số lượng</th>
+                        <th>Giá bán</th>
+                        <th>Thành tiền</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var ct in Model.ChiTietDonHangs)
+                    {
+                        <tr>
+                            <td>@ct.SanPham?.TenSP</td>
+                            <td>@ct.SoLuong</td>
+                            <td>@ct.GiaBan.ToString("N0") Đ</td>
+                            <td>@((ct.GiaBan * ct.SoLuong).ToString("N0")) Đ</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        <a asp-controller="DonHang" asp-action="CuaToi" class="back-btn">
+            ← Trở về
+        </a>
+    </div>
+</div>

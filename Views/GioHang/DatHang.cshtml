@@ -1,0 +1,209 @@
+﻿@model CoffeeShopManager.Models.DonHang
+@using CoffeeShopManager.ViewModels
+
+@{
+    ViewData["Title"] = "Đặt hàng";
+
+    var gioHang = ViewBag.GioHang as List<GioHangItemViewModel> ?? new List<GioHangItemViewModel>();
+    decimal tongTien = ViewBag.TongTien ?? 0;
+}
+
+<style>
+    .order-page {
+        min-height: 100vh;
+        background: #f5f1e8;
+        padding: 45px 30px 70px;
+        font-family: 'Merriweather', 'Noto Serif Display', 'Be Vietnam Pro', serif;
+    }
+
+    .order-sheet {
+        max-width: 980px;
+        margin: 0 auto;
+        background: #f8f6ef;
+        border: 4px solid #4d5c4f;
+        padding: 36px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    }
+
+    .order-title {
+        text-align: center;
+        color: #8f2f24;
+        font-size: 44px;
+        font-weight: 900;
+        text-transform: uppercase;
+        margin-bottom: 18px;
+    }
+
+    .order-line {
+        border-bottom: 4px dashed #8f2f24;
+        margin: 0 auto 30px;
+        width: 92%;
+    }
+
+    .form-group {
+        margin-bottom: 26px;
+    }
+
+    .form-label {
+        display: block;
+        color: #28404a;
+        font-size: 19px;
+        font-weight: 900;
+        margin-bottom: 10px;
+    }
+
+    .form-control-custom {
+        width: 100%;
+        border: none;
+        border-bottom: 4px solid #4d5c4f;
+        background: transparent;
+        padding: 10px 8px;
+        font-size: 18px;
+        font-weight: 700;
+        color: #28404a;
+        outline: none;
+    }
+
+    .summary-box {
+        margin-top: 28px;
+        padding: 20px;
+        border: 3px solid #4d5c4f;
+        background: #fffaf0;
+    }
+
+    .summary-title {
+        color: #8f2f24;
+        font-size: 22px;
+        font-weight: 900;
+        margin-bottom: 14px;
+        text-transform: uppercase;
+    }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px dashed #999;
+        padding: 8px 0;
+        font-weight: 800;
+        color: #28404a;
+    }
+
+    .summary-total {
+        margin-top: 14px;
+        color: #8f2f24;
+        font-size: 26px;
+        font-weight: 900;
+        text-align: right;
+    }
+
+    .button-row {
+        margin-top: 34px;
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .back-btn,
+    .submit-btn {
+        min-width: 180px;
+        height: 56px;
+        border: 4px solid #4d5c4f;
+        font-size: 18px;
+        font-weight: 900;
+        text-transform: uppercase;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .back-btn {
+        color: #26404a;
+        background: transparent;
+    }
+
+        .back-btn:hover {
+            background: #e9e3d7;
+            color: #26404a;
+        }
+
+    .submit-btn {
+        background: #3d5343;
+        color: white;
+    }
+
+        .submit-btn:hover {
+            background: #2f4335;
+        }
+
+    .text-danger {
+        font-weight: 800;
+    }
+</style>
+
+<div class="order-page">
+    <div class="order-sheet">
+        <h1 class="order-title">Ghi nhận đơn mới</h1>
+        <div class="order-line"></div>
+
+        <form asp-controller="GioHang" asp-action="DatHang" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="form-group">
+                <label class="form-label">Tên khách hàng:</label>
+                <input type="text"
+                       name="tenKhachHang"
+                       value="@Model.TenKhachHang"
+                       class="form-control-custom"
+                       placeholder="Nhập tên khách..." />
+                <span asp-validation-for="TenKhachHang" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Số điện thoại:</label>
+                <input type="text"
+                       name="soDienThoai"
+                       value="@Model.SoDienThoai"
+                       class="form-control-custom"
+                       placeholder="Nhập số liên lạc..." />
+                <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Ghi chú thêm:</label>
+                <textarea name="ghiChu"
+                          class="form-control-custom"
+                          rows="3"
+                          placeholder="Ví dụ: ít đá, nhiều sữa...">@Model.GhiChu</textarea>
+            </div>
+
+            <div class="summary-box">
+                <div class="summary-title">Sản phẩm trong giỏ</div>
+
+                @foreach (var item in gioHang)
+                {
+                    <div class="summary-item">
+                        <span>@item.TenSP x @item.SoLuong</span>
+                        <span>@item.ThanhTien.ToString("N0") Đ</span>
+                    </div>
+                }
+
+                <div class="summary-total">
+                    Tổng tiền: @tongTien.ToString("N0") Đ
+                </div>
+            </div>
+
+            <div class="button-row">
+                <a asp-controller="GioHang" asp-action="Index" class="back-btn">
+                    ← Trở về
+                </a>
+
+                <button type="submit" class="submit-btn">
+                    Chốt đơn ✓
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

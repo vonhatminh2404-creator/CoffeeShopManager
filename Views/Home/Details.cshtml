@@ -157,7 +157,9 @@
 
             <form asp-controller="GioHang" asp-action="ThemVaoGio" method="post">
                 @Html.AntiForgeryToken()
+
                 <input type="hidden" name="id" value="@Model.MaSP" />
+
                 <button type="submit" class="cart-btn">
                     + Thêm vào giỏ hàng
                 </button>

@@ -19,10 +19,18 @@ namespace CoffeeShopManager.Models
 
         public double TongTien { get; set; }
 
-        public string TrangThai { get; set; } = "Chờ xử lý"; // Chờ xử lý, Đang pha chế, Đã giao
+        public string TrangThai { get; set; } = "Chờ xử lý";
 
         public string? GhiChu { get; set; } = "";
 
         public int? MaSP { get; set; }
+
+        // Liên kết đơn hàng với tài khoản người dùng
+        public int? MaNguoiDung { get; set; }
+
+        [ForeignKey("MaNguoiDung")]
+        public virtual NguoiDung? NguoiDung { get; set; }
+
+        public virtual ICollection<ChiTietDonHang> ChiTietDonHangs { get; set; } = new List<ChiTietDonHang>();
     }
 }
