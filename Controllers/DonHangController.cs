@@ -29,6 +29,17 @@ namespace CoffeeShopManager.Controllers
             return null;
         }
 
+        private List<string> DanhSachTrangThai()
+        {
+            return new List<string>
+            {
+                "Chờ xử lý",
+                "Đang chuẩn bị",
+                "Hoàn thành",
+                "Đã hủy"
+            };
+        }
+
         // ADMIN: Xem toàn bộ đơn hàng
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index()
@@ -38,10 +49,12 @@ namespace CoffeeShopManager.Controllers
                 .OrderByDescending(d => d.NgayDat)
                 .ToListAsync();
 
+            ViewBag.DanhSachTrangThai = DanhSachTrangThai();
+
             return View(donHangs);
         }
 
-        // ADMIN: Xem chi tiết một đơn hàng
+        // ADMIN: Xem chi tiết đơn hàng
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Details(int? madonhang)
         {
@@ -61,7 +74,40 @@ namespace CoffeeShopManager.Controllers
                 return NotFound();
             }
 
+            ViewBag.DanhSachTrangThai = DanhSachTrangThai();
+
             return View(donhang);
+        }
+
+        // ADMIN: Cập nhật trạng thái đơn hàng
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> CapNhatTrangThai(int madonhang, string trangThai)
+        {
+            var danhSachTrangThai = DanhSachTrangThai();
+
+            if (!danhSachTrangThai.Contains(trangThai))
+            {
+                TempData["Error"] = "Trạng thái đơn hàng không hợp lệ.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var donHang = await _context.DonHangs.FindAsync(madonhang);
+
+            if (donHang == null)
+            {
+                return NotFound();
+            }
+
+            donHang.TrangThai = trangThai;
+
+            _context.Update(donHang);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = $"Đã cập nhật đơn hàng #{donHang.MaDonHang} sang trạng thái: {trangThai}.";
+
+            return RedirectToAction(nameof(Index));
         }
 
         // USER: Xem đơn hàng của chính mình
@@ -109,131 +155,6 @@ namespace CoffeeShopManager.Controllers
             return View(donHang);
         }
 
-        // ADMIN: Tạo đơn hàng thủ công
-        [Authorize(Roles = "Admin")]
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // ADMIN: Tạo đơn hàng thủ công từ sản phẩm
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create(int? sanPhamId)
-        {
-            var donHangMoi = new DonHang();
-
-            if (sanPhamId != null)
-            {
-                var sanPham = await _context.SanPhams.FindAsync(sanPhamId);
-
-                if (sanPham != null)
-                {
-                    donHangMoi.MaSP = sanPham.MaSP;
-                    donHangMoi.TongTien = (double)sanPham.Gia;
-                    donHangMoi.GhiChu = "Món đặt: " + sanPham.TenSP;
-                }
-            }
-
-            return View(donHangMoi);
-        }
-
-        // ADMIN: Sửa đơn hàng
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int? madonhang)
-        {
-            if (madonhang == null)
-            {
-                return NotFound();
-            }
-
-            var donhang = await _context.DonHangs.FindAsync(madonhang);
-
-            if (donhang == null)
-            {
-                return NotFound();
-            }
-
-            return View(donhang);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(
-            int? madonhang,
-            [Bind("MaDonHang,TenKhachHang,SoDienThoai,NgayDat,TongTien,TrangThai,GhiChu,MaSP,MaNguoiDung")] DonHang donhang)
-        {
-            if (madonhang != donhang.MaDonHang)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(donhang);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!DonHangExists(donhang.MaDonHang))
-                    {
-                        return NotFound();
-                    }
-
-                    throw;
-                }
-
-                return RedirectToAction(nameof(Index));
-            }
-
-            return View(donhang);
-        }
-
-        // ADMIN: Xóa đơn hàng
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(int? madonhang)
-        {
-            if (madonhang == null)
-            {
-                return NotFound();
-            }
-
-            var donhang = await _context.DonHangs
-                .FirstOrDefaultAsync(m => m.MaDonHang == madonhang);
-
-            if (donhang == null)
-            {
-                return NotFound();
-            }
-
-            return View(donhang);
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteConfirmed(int? madonhang)
-        {
-            var donhang = await _context.DonHangs.FindAsync(madonhang);
-
-            if (donhang != null)
-            {
-                _context.DonHangs.Remove(donhang);
-            }
-
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool DonHangExists(int? madonhang)
-        {
-            return _context.DonHangs.Any(e => e.MaDonHang == madonhang);
-        }
         // USER: Hủy đơn hàng của chính mình
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -269,6 +190,110 @@ namespace CoffeeShopManager.Controllers
             TempData["Success"] = "Bạn đã hủy đơn hàng thành công.";
 
             return RedirectToAction(nameof(CuaToi));
+        }
+
+        // ADMIN: Form tạo đơn hàng thủ công
+        [Authorize(Roles = "Admin")]
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        // ADMIN: Form sửa đơn hàng
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Edit(int? madonhang)
+        {
+            if (madonhang == null)
+            {
+                return NotFound();
+            }
+
+            var donhang = await _context.DonHangs.FindAsync(madonhang);
+
+            if (donhang == null)
+            {
+                return NotFound();
+            }
+
+            return View(donhang);
+        }
+
+        // ADMIN: Xử lý sửa đơn hàng
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Edit(
+            int? madonhang,
+            [Bind("MaDonHang,TenKhachHang,SoDienThoai,NgayDat,TongTien,TrangThai,GhiChu,MaSP,MaNguoiDung")] DonHang donhang)
+        {
+            if (madonhang != donhang.MaDonHang)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(donhang);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!DonHangExists(donhang.MaDonHang))
+                    {
+                        return NotFound();
+                    }
+
+                    throw;
+                }
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(donhang);
+        }
+
+        // ADMIN: Form xóa đơn hàng
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(int? madonhang)
+        {
+            if (madonhang == null)
+            {
+                return NotFound();
+            }
+
+            var donhang = await _context.DonHangs
+                .FirstOrDefaultAsync(m => m.MaDonHang == madonhang);
+
+            if (donhang == null)
+            {
+                return NotFound();
+            }
+
+            return View(donhang);
+        }
+
+        // ADMIN: Xử lý xóa đơn hàng
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteConfirmed(int? madonhang)
+        {
+            var donhang = await _context.DonHangs.FindAsync(madonhang);
+
+            if (donhang != null)
+            {
+                _context.DonHangs.Remove(donhang);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        private bool DonHangExists(int? madonhang)
+        {
+            return _context.DonHangs.Any(e => e.MaDonHang == madonhang);
         }
     }
 }

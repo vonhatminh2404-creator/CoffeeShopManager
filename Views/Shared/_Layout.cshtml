@@ -266,6 +266,9 @@
             @if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Admin"))
             {
                 <div class="menu-bottom">
+                    <a asp-controller="Admin" asp-action="Dashboard" class="order-btn">
+                        DASHBOARD
+                    </a>
                     <a asp-controller="Admin" asp-action="Index" class="order-btn">
                         QUẢN LÝ SẢN PHẨM
                     </a>
