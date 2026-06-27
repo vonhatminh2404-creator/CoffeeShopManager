@@ -138,9 +138,16 @@
                 {
                     <tr>
                         <td>
-                            @* Hiển thị ảnh thu nhỏ *@
-                            <img src="@(string.IsNullOrEmpty(item.HinhAnh) || item.HinhAnh == "Không" ? "https://via.placeholder.com/60" : item.HinhAnh)"
-                                 alt="@item.TenSP" style="width: 60px; height: 60px; object-fit: cover; border: 2px solid #36453B;" />
+                            @if (!string.IsNullOrEmpty(item.HinhAnh))
+                            {
+                                <img src="@Url.Content("~/images/" + item.HinhAnh)"
+                                     alt="@item.TenSP"
+                                     style="width:90px; height:60px; object-fit:cover; border:1px solid #999;" />
+                            }
+                            else
+                            {
+                                <span>Chưa có ảnh</span>
+                            }
                         </td>
                         <td class="text-start fw-bold" style="color: #8B2F29;">
                             @Html.DisplayFor(modelItem => item.TenSP)

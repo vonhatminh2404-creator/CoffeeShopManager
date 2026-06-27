@@ -9,7 +9,6 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection")));
 
-// Bật Session để lưu giỏ hàng tạm thời
 builder.Services.AddDistributedMemoryCache();
 
 builder.Services.AddSession(options =>
@@ -19,7 +18,6 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// Cấu hình đăng nhập bằng Cookie
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
